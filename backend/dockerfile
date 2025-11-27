@@ -1,0 +1,27 @@
+# Backend Development Dockerfile
+# Simple, hot reload enabled
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies for native modules
+RUN apk add --no-cache python3 make g++
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev)
+RUN npm install
+
+# Copy TypeScript config
+COPY tsconfig.json ./
+
+# Copy source code (will be overridden by volume mount in docker-compose)
+COPY src ./src
+
+# Expose port
+EXPOSE 5000
+
+# Start with hot reload using ts-node-dev
+CMD ["npm", "run", "dev"]
