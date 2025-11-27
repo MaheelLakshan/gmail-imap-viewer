@@ -1,0 +1,29 @@
+# Frontend Development Dockerfile (Vite)
+# Simple, hot reload enabled
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy config files
+COPY tsconfig.json ./
+COPY vite.config.ts ./
+COPY tailwind.config.js ./
+COPY postcss.config.cjs ./
+
+# Copy source (will be overridden by volume mount in docker-compose)
+COPY index.html ./
+COPY public ./public
+COPY src ./src
+
+# Expose Vite port
+EXPOSE 5173
+
+# Start Vite dev server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
