@@ -16,13 +16,6 @@ const LoginPage: React.FC = () => {
   const handleGoogleLogin = async (): Promise<void> => {
     setLoading(true);
     try {
-      // ========== DUMMY DATA - Uncomment to test without OAuth ==========
-      // Simulate OAuth redirect for testing
-      // window.location.href = '/auth/callback?token=dummy-token-12345';
-      // return;
-      // ==================================================================
-
-      // Real OAuth flow
       const authUrl = await getGoogleAuthUrl();
       window.location.href = authUrl;
     } catch (error) {
@@ -32,42 +25,40 @@ const LoginPage: React.FC = () => {
   };
 
   const features: Feature[] = [
-    {
-      icon: Shield,
-      title: 'Secure OAuth2',
-      description: 'Your credentials never touch our servers',
-    },
-    {
-      icon: Zap,
-      title: 'Fast IMAP Sync',
-      description: 'Quick and efficient email synchronization',
-    },
-    {
-      icon: Lock,
-      title: 'Privacy First',
-      description: 'Your emails stay private and secure',
-    },
+    { icon: Shield, title: 'Secure OAuth2', description: 'Your credentials never touch our servers.' },
+    { icon: Zap, title: 'Fast IMAP Sync', description: 'Quick and efficient email synchronization.' },
+    { icon: Lock, title: 'Privacy First', description: 'Your emails stay private and secure.' },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary-600 text-white mb-6 shadow-lg">
-              <Mail className="w-10 h-10" />
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Gmail IMAP Viewer</h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">Securely access and manage your Gmail emails with our modern, privacy-focused email viewer</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col items-center">
+      <div className="text-center py-12 px-6">
+        <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-primary-600 text-white shadow-lg mb-6 mx-auto">
+          <Mail className="w-12 h-12" />
+        </div>
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-2">Gmail IMAP Viewer</h1>
+        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Securely access and manage your Gmail emails with a modern, privacy-focused interface.</p>
+      </div>
 
-          {/* Login Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-12">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Get Started</h2>
-              <p className="text-gray-600 dark:text-gray-400">Sign in with your Google account to access your emails</p>
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 px-6 pb-12">
+        <div className="flex flex-col justify-center space-y-6">
+          {features.map(({ icon: Icon, title, description }) => (
+            <div key={title} className="flex items-start gap-4 p-5 bg-white dark:bg-gray-800 rounded-2xl shadow hover:shadow-lg transition">
+              <div className="w-14 h-14 rounded-lg bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center mt-1">
+                <Icon className="w-6 h-6 text-primary-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+                <p className="text-gray-600 dark:text-gray-400">{description}</p>
+              </div>
             </div>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-center">
+          <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white text-center mb-4">Get Started</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-center mb-8">Sign in with your Google account to access your emails</p>
 
             <button
               onClick={handleGoogleLogin}
@@ -95,19 +86,6 @@ const LoginPage: React.FC = () => {
 
             <p className="text-center text-sm text-gray-500 mt-4">By signing in, you agree to allow this app to access your Gmail account</p>
           </div>
-
-          {/* Features */}
-          {/* <div className="grid md:grid-cols-3 gap-6">
-            {features.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                <div className="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center mb-4">
-                  <Icon className="w-6 h-6 text-primary-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
-                <p className="text-gray-600 dark:text-gray-400">{description}</p>
-              </div>
-            ))}
-          </div> */}
         </div>
       </div>
     </div>
