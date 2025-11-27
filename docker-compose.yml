@@ -1,0 +1,103 @@
+# version: '3.8'
+
+# Development Docker Compose - Hot reload enabled
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: gmail-viewer-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword123
+      MYSQL_DATABASE: gmail_viewer
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-prootpassword123']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - gmail-network
+
+  # Backend API (HOT RELOAD ENABLED)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+    container_name: gmail-viewer-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: gmail_viewer
+      DB_USER: root
+      DB_PASSWORD: rootpassword123
+      JWT_SECRET: dev-secret-key-for-development-only
+      JWT_EXPIRES_IN: 7d
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-your-google-client-id}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-your-google-client-secret}
+      GOOGLE_REDIRECT_URI: http://localhost:5000/api/auth/google/callback
+      FRONTEND_URL: http://localhost:5173
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 1000
+    volumes:
+      # Mount entire src directory for hot reload
+      - ./backend/src:/app/src:cached
+      - ./backend/package.json:/app/package.json:cached
+      - ./backend/tsconfig.json:/app/tsconfig.json:cached
+      - /app/node_modules
+    ports:
+      - '5000:5000'
+    networks:
+      - gmail-network
+
+  # Frontend Vite (HOT RELOAD ENABLED)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    container_name: gmail-viewer-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+      # Enable hot reload for Docker
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    volumes:
+      # Mount source files for hot reload
+      - ./frontend/src:/app/src:cached
+      - ./frontend/public:/app/public:cached
+      - ./frontend/index.html:/app/index.html:cached
+      - ./frontend/vite.config.ts:/app/vite.config.ts:cached
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js:cached
+      - ./frontend/postcss.config.cjs:/app/postcss.config.cjs:cached
+      - ./frontend/tsconfig.json:/app/tsconfig.json:cached
+      - /app/node_modules
+    ports:
+      - '5173:5173'
+    stdin_open: true
+    tty: true
+    networks:
+      - gmail-network
+
+networks:
+  gmail-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
